@@ -1,0 +1,273 @@
+{
+  "name": "知几 · 算命大脑 v2（双专家）",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "zhiji-consult-v2",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "281a4152-803f-44e6-ba09-b531d2a1e7a0",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -520,
+        0
+      ],
+      "webhookId": "451566fd-b29f-4914-95e1-e8a9bd76f4ed"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json || {};\nconst body = raw.body && typeof raw.body === 'object' ? raw.body : raw;\nconst question = String(body.question || '').trim();\nif (!question) return [{ json: { error: 'missing question' } }];\nconst domain = String(body.domain || 'career');\nconst facts = body.facts && typeof body.facts === 'object' ? body.facts : {};\nlet timeMode = String(body.timeMode || facts.timeMode || 'exact');\nif (body.timeUnknown === true || facts.timeUnknown === true) timeMode = 'unknown';\n\nconst domainGuide = {\n  career: '事业/合作：看长期适配与当下推进条件，给条件，不替用户拍板。',\n  wealth: '财富/投入：看现金流、风险承受与投入产出，不做投资建议。',\n  relationship: '亲密/关系：看边界、沟通与承诺，不预测分手、结婚或具体对象。',\n  travel: '迁移/出行：看环境变化、外部机会与落脚点，不保证结果。',\n  timing: '时机：回答该动还是该等，给出触发条件与止损点。'\n}[domain] || '把长期结构与当下这件事分开说。';\n\nconst readingGuide = facts.readingGuide || (timeMode === 'unknown'\n  ? '出生时辰不详。facts 里没有紫微命宫，禁止编造命宫、主星、四化、大限或时辰盘。这一问以奇门断事为主；全文最后温和询问是否愿意做「三问定盘」。'\n  : timeMode === 'fuzzy'\n    ? '只知道一个模糊时段。ziwei.variants 是每个时辰各排一次的摘要。只采用交集；矛盾就说清楚，不要挑一个时辰当成出生时辰。'\n    : '时辰已定。紫微看长期结构，奇门看当下这件事。两盘不一致时分开说。');\n\nconst ziweiSystem = timeMode === 'unknown'\n  ? '你是紫微斗数专家。出生时辰不详，facts 中没有可用紫微命盘。你只回复一句：「时辰不详，长期结构无法读取，不作紫微判断。」不要写任何星曜、宫位、四化或大限。'\n  : '你是紫微斗数专家，只负责长期结构。只使用 facts.ziwei；不得新增星曜、宫位、四化、大限。只输出 3-5 条观察，每条不超过 40 字；不给最终建议，不写成散文。若是模糊时辰，只采用 variants 的共同点，矛盾要写明。';\n\nconst qimenSystem = '你是奇门遁甲专家，只负责当下时空。只使用 facts.qimen；不得新增门、星、神、宫位、局数。只输出 3-5 条观察，每条不超过 40 字；不给最终建议，不写成散文。';\n\nconst ziweiUser = [\n  '问题：' + question,\n  '领域：' + domainGuide,\n  '时辰状态：' + timeMode,\n  '紫微 facts：',\n  JSON.stringify(facts.ziwei || {}, null, 2)\n].join('\\n');\n\nconst qimenUser = [\n  '问题：' + question,\n  '领域：' + domainGuide,\n  '起局时间：' + (facts.qimen && facts.qimen.castAt || ''),\n  '奇门 facts：',\n  JSON.stringify(facts.qimen || {}, null, 2)\n].join('\\n');\n\nreturn [{ json: {\n  question, domain, timeMode, facts, readingGuide, domainGuide,\n  ziweiMessages: [\n    { role: 'system', content: ziweiSystem },\n    { role: 'user', content: ziweiUser }\n  ],\n  qimenMessages: [\n    { role: 'system', content: qimenSystem },\n    { role: 'user', content: qimenUser }\n  ]\n} }];"
+      },
+      "id": "7c91d475-3adf-4a85-b931-4cf900a5d711",
+      "name": "Prepare",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -280,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'glm-4-plus', messages: $json.ziweiMessages, temperature: 0.3, max_tokens: 900 }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "5c19de0c-2c93-4958-966c-f77195808c31",
+      "name": "Ziwei Chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -40,
+        -120
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_ZHIPU_HEADER_AUTH_ID",
+          "name": "Zhipu Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const prep = $('Prepare').first().json;\nconst data = $input.first().json || {};\nconst content = data?.choices?.[0]?.message?.content || '';\nreturn [{ json: { ...prep, ziweiExpert: content } }];"
+      },
+      "id": "799321a5-0ac5-41ec-94dc-f3fefbbc90bc",
+      "name": "Keep Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'glm-4-plus', messages: $json.qimenMessages, temperature: 0.3, max_tokens: 900 }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "af22fbc1-b575-4915-b4a4-f830db805bfe",
+      "name": "Qimen Chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_ZHIPU_HEADER_AUTH_ID",
+          "name": "Zhipu Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const prep = $('Keep Context').first().json;\nconst qimenData = $input.first().json || {};\nconst ziweiExpert = prep.ziweiExpert || '';\nconst qimenExpert = qimenData?.choices?.[0]?.message?.content || '';\n\nconst system = [\n  '你是「知几」的会诊合成器。你拿到紫微专家、奇门专家各自写的观察，负责把它们翻成用户能直接用的人话。',\n  '硬性规则：',\n  '1. 只能使用 facts 和两位专家的观察；不得新增星曜、宫位、四化、门、星、神、局数、格局。',\n  '2. 默认回答里不要出现星曜名、宫位名、八门/九星/八神名、四化、局数；术语只留在 facts 里。',\n  '3. 不要使用“科学证明”“准确率”“命中率”“一定”“必然”；不做医疗、法律、投资、生死断言。',\n  '4. 必须使用下面的 Markdown 结构，标题用 ##：',\n  '## 一句话',\n  '先用 2-3 句人话回答用户的具体问题，给有条件的倾向。',\n  '## 为什么这么说',\n  '用 2-3 段人话解释；合并两位专家的观察，但不要提“专家说”。长期与当下分开说。',\n  '## 你可以怎么做',\n  '最多 3 条，用 - 列表；每条具体到用户问题里的选择。',\n  '## 要留意',\n  '1-2 条人话提醒。',\n  '## 这套会诊的边界',\n  '一句，说明它不能替代什么。',\n  '5. 两位专家矛盾时，不要折中成一句吉凶；说明它们各自回答什么，哪一层更贴近当前问题。',\n  '6. 语气像坐在对面说话：短句、具体、少形容词。',\n  '7. ' + prep.readingGuide,\n  '8. ' + prep.domainGuide\n].join('\\n');\n\nconst user = [\n  '问题：' + prep.question,\n  '领域：' + prep.domainGuide,\n  '时辰状态：' + prep.timeMode,\n  '',\n  '紫微专家观察：',\n  ziweiExpert || '（无）',\n  '',\n  '奇门专家观察：',\n  qimenExpert || '（无）',\n  '',\n  '结构化 facts（只可用于核对，不得把字段名搬进正文）：',\n  JSON.stringify(prep.facts, null, 2)\n].join('\\n');\n\nreturn [{ json: { messages: [\n  { role: 'system', content: system },\n  { role: 'user', content: user }\n] } }];"
+      },
+      "id": "ddb58d85-a3ff-480b-a395-3b2c7c5885ec",
+      "name": "Build Synthesis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'glm-4-plus', messages: $json.messages, temperature: 0.4, max_tokens: 1700 }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "6b8f7125-8446-42fa-bbf9-1ef0af70e320",
+      "name": "Synthesis Chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        920,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_ZHIPU_HEADER_AUTH_ID",
+          "name": "Zhipu Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json || {};\nconst content = data?.choices?.[0]?.message?.content || '';\nif (!content) return [{ json: { error: 'empty completion' } }];\nreturn [{ json: { content, model: data.model || 'glm-4-plus' } }];"
+      },
+      "id": "6617c06a-18cf-4f5d-bed8-511334923e1c",
+      "name": "Extract Final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ content: $json.content, model: $json.model }) }}",
+        "options": {}
+      },
+      "id": "abc0cde6-aea0-4478-9284-4044362c139f",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1400,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare": {
+      "main": [
+        [
+          {
+            "node": "Ziwei Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ziwei Chat": {
+      "main": [
+        [
+          {
+            "node": "Keep Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Context": {
+      "main": [
+        [
+          {
+            "node": "Qimen Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qimen Chat": {
+      "main": [
+        [
+          {
+            "node": "Build Synthesis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Synthesis": {
+      "main": [
+        [
+          {
+            "node": "Synthesis Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Synthesis Chat": {
+      "main": [
+        [
+          {
+            "node": "Extract Final",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Final": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "68ba71a7-640b-4ba6-9ba5-98edd52ebfa0",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [],
+  "pinData": {}
+}

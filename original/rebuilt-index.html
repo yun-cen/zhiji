@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>星鉴 · 紫微斗数｜by 天水一壤</title>
+<meta name="description" content="星鉴：一张紫微斗数命盘，读十二宫、四化、格局、大限与流年。输入出生时间即排盘，所有计算在浏览器本地完成。by 天水一壤。">
+<meta name="author" content="天水一壤">
+<meta name="theme-color" content="#121212">
+<meta property="og:type" content="website">
+<meta property="og:title" content="星鉴 · 紫微斗数">
+<meta property="og:description" content="以星为鉴，可以知进退。十二宫、四化、格局、大限与流年，一次读清。by 天水一壤。">
+<meta property="og:locale" content="zh_CN">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="masthead">
+  <div class="wrap navbar">
+    <a class="brand" href="#home" aria-label="星鉴首页">
+      <span class="brand-stamp" aria-hidden="true">鉴</span>
+      <span class="brand-name">星鉴</span>
+      <span class="brand-sub">紫微斗数</span>
+    </a>
+    <nav id="work-nav" aria-label="主导航" hidden>
+      <a href="#chart">排盘</a>
+      <a href="#reading">解读</a>
+      <a href="#guide">凡例</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section id="start" class="landing" aria-labelledby="hero-title">
+    <div class="wrap landing-inner">
+      <div class="verse">
+        <h1 id="hero-title" tabindex="-1"><span>星</span><span>鉴</span></h1>
+        <span class="verse-seal" aria-hidden="true">紫微</span>
+      </div>
+      <p class="landing-note">以星为鉴，可以知进退</p>
+      <p class="landing-lead">输入出生时间，排一张紫微斗数命盘。十二宫、四化、格局、大限与流年，一次读清。</p>
+      <div class="landing-actions">
+        <a class="ink-button landing-button" href="#chart">排一张盘</a>
+        <button class="ink-button landing-button ghost" id="demo" type="button">看示例</button>
+      </div>
+      <p class="landing-credit">by 天水一壤</p>
+      <ul class="landing-facts" aria-label="站点说明">
+        <li>本地排盘，不上传出生信息</li>
+        <li>无需登录，打开即用</li>
+        <li>传统星曜，现代语言</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="workbench" class="workbench" hidden>
+    <div class="wrap">
+      <div class="work-heading">
+        <h1 id="work-title" tabindex="-1">命盘与解读</h1>
+        <a class="quiet-link" href="#home">返回首页</a>
+      </div>
+
+      <div class="workspace">
+        <aside class="paper input-card" aria-labelledby="form-title">
+          <h2 id="form-title">出生信息</h2>
+          <form id="birth-form" novalidate>
+            <fieldset>
+              <legend>历法</legend>
+              <div class="segments">
+                <label><input type="radio" name="calendar" value="solar" checked><span>公历</span></label>
+                <label><input type="radio" name="calendar" value="lunar"><span>农历</span></label>
+              </div>
+            </fieldset>
+
+            <div id="solar-fields">
+              <label for="solar-date">出生日期</label>
+              <input type="date" id="solar-date" min="1900-01-01" max="2100-12-31" required>
+            </div>
+
+            <div id="lunar-fields" hidden>
+              <label for="lunar-year">农历生日</label>
+              <div class="lunar-grid">
+                <select id="lunar-year" aria-label="农历年"></select>
+                <select id="lunar-month" aria-label="农历月"></select>
+                <select id="lunar-day" aria-label="农历日"></select>
+              </div>
+              <label class="check"><input type="checkbox" id="leap"> 闰月</label>
+            </div>
+
+            <div>
+              <label for="hour">出生时辰</label>
+              <select id="hour" required></select>
+            </div>
+
+            <fieldset>
+              <legend>排盘性别</legend>
+              <div class="segments">
+                <label><input type="radio" name="gender" value="女" checked><span>女</span></label>
+                <label><input type="radio" name="gender" value="男"><span>男</span></label>
+              </div>
+            </fieldset>
+
+            <p class="error" id="form-error" role="alert" hidden></p>
+            <button class="ink-button submit" type="submit">排盘并解读</button>
+            <button class="text-button" id="example" type="button">填入示例</button>
+            <p class="input-note">出生信息只在本机浏览器计算，不会上传。紫微斗数对时辰敏感；若时辰不确定，可先按大概时段排盘，重点看主星与三方结构，宫位会有偏差。</p>
+          </form>
+        </aside>
+
+        <section class="paper chart-card" id="chart" aria-labelledby="chart-title">
+          <div class="chart-header">
+            <h2 id="chart-title">命盘</h2>
+            <div id="chart-modes" class="segments" role="radiogroup" aria-label="盘面范围" hidden>
+              <label><input type="radio" name="mode" value="natal" checked><span>本命</span></label>
+              <label><input type="radio" name="mode" value="decadal"><span>大限</span></label>
+              <label><input type="radio" name="mode" value="yearly"><span>流年</span></label>
+            </div>
+          </div>
+
+          <div id="year-tools" class="year-tools" hidden>
+            <label for="year-date">参照日期</label>
+            <input type="date" id="year-date">
+            <p id="year-info" aria-live="polite"></p>
+          </div>
+
+          <div class="chart-stage" id="chart-stage">
+            <div class="chart-empty" id="chart-empty">
+              <span class="empty-mark" aria-hidden="true">命</span>
+              <p>先排一张盘</p>
+              <small>填写左侧出生信息，或点“看示例”。</small>
+            </div>
+            <div class="chart-grid" id="chart-grid" hidden></div>
+            <div class="casting" id="casting" hidden>
+              <span class="casting-stamp">排盘中</span>
+              <span class="sr-only" id="casting-status" aria-live="polite"></span>
+            </div>
+          </div>
+
+          <div class="chart-caption" id="chart-caption" hidden></div>
+          <div class="palace-detail" id="palace-detail" hidden aria-live="polite"></div>
+        </section>
+      </div>
+
+      <section class="folio" id="reading" aria-labelledby="reading-title" hidden>
+        <div class="folio-heading">
+          <div>
+            <h2 id="reading-title">命盘解读</h2>
+            <p id="reading-meta"></p>
+          </div>
+          <div class="folio-tools">
+            <span class="sample-chip" id="reading-example" hidden>示例命盘</span>
+            <button class="text-button" id="expand-evidence" type="button" aria-expanded="false">展开全部依据</button>
+            <button class="text-button" id="print" type="button">打印 / 存为 PDF</button>
+          </div>
+        </div>
+        <nav class="reading-nav" id="reading-nav" aria-label="解读目录"></nav>
+        <div class="reading-grid" id="reading-grid"></div>
+        <p class="reading-note">解读写的是倾向与课题，不是定数。健康、法律、投资等决定，请以专业意见为准。</p>
+      </section>
+
+      <section class="guide" id="guide" aria-labelledby="guide-title">
+        <div class="guide-heading">
+          <h2 id="guide-title">凡例</h2>
+          <p>这张盘是怎么读出来的</p>
+        </div>
+        <div class="guide-grid">
+          <div>
+            <h3>一、先看命身</h3>
+            <p>命宫看你先天的气质与立足方式，身宫看后天真正在意、容易被牵动的领域。命宫无主星时，借对宫与三方四正来读，不把“空宫”直接当成弱。</p>
+          </div>
+          <div>
+            <h3>二、再看三方四正</h3>
+            <p>命宫、财帛、官禄、迁移合称三方四正。单星只说明一种倾向，星与星的组合、亮度、四化，才决定它在生活里以什么方式出现。</p>
+          </div>
+          <div>
+            <h3>三、最后看运限</h3>
+            <p>大限管十年主题，流年管一年触发。本命是底色，运限是天气；同一张盘，走到不同宫位，呈现出来的重点会变。本站大限按虚岁计。</p>
+          </div>
+        </div>
+        <div class="guide-notes">
+          <p><b>亮度</b>：庙、旺、得、利为得地，平为中性，不、陷为失地。得地不等于吉，失地也不等于凶，只说明这颗星的力量是否容易使出来。</p>
+          <p><b>四化</b>：禄、权、科、忌是四类力量，不是四个好坏标签。禄是机会与投入，权是责任与决定权，科是专业与口碑，忌是容易反复的课题。</p>
+          <p><b>空宫</b>：本宫无主星时，先借对宫主星，再参考三方四正。空宫的人可塑性强，受环境影响大，不等于命薄。</p>
+          <p><b>流月</b>：以农历月为界，换月前后可能有几天误差；只作节律参考，不当作具体日期的断语。</p>
+        </div>
+        <div class="guide-sources">
+          <span>取象参考：《紫微斗数全书》形性赋、诸星问答论、十二宫、运限诸篇。</span>
+          <span>排盘：<a href="https://github.com/SylarLong/iztro" target="_blank" rel="noopener noreferrer">iztro</a>（MIT License）。</span>
+          <span>本站文字为原创整理，示例与建议不构成专业意见。</span>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <p class="footer-brand">星鉴 · 紫微斗数</p>
+    <p>by 天水一壤</p>
+    <p class="footer-note">传统文化参考，不构成医疗、法律、投资建议。所有排盘在本地浏览器完成。</p>
+  </div>
+</footer>
+
+<noscript><p class="noscript">星鉴需要 JavaScript 才能排盘。请在浏览器中开启 JavaScript。</p></noscript>
+
+<script src="iztro.js"></script>
+<script src="star-library.js"></script>
+<script src="reading-library.js"></script>
+<script src="reading.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

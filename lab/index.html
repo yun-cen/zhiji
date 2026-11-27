@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf4e6">
+  <meta name="description" content="知几。一庭风动竹，半砚水涵星。">
+  <title>知几 · 问事台</title>
+  <link rel="icon" href="../assets/zhiji-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../fonts.css">
+  <link rel="stylesheet" href="lab.css">
+</head>
+<body>
+  <div class="sky" aria-hidden="true">
+    <div class="mist mist-a"></div>
+    <div class="mist mist-b"></div>
+    <svg class="bagua" viewBox="0 0 640 640">
+      <g transform="translate(320 320)">
+        <circle r="250" fill="none" stroke="#527766" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="22 8 4 14 36 10" opacity=".55"/>
+        <circle r="198" fill="none" stroke="#527766" stroke-width=".7" stroke-linecap="round" stroke-dasharray="3 9 16 5 2 12" opacity=".4"/>
+        <circle r="146" fill="none" stroke="#887143" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="8 18 2 10" opacity=".28"/>
+        <g class="trigrams" fill="none" stroke="#527766" stroke-linecap="round">
+          <g transform="rotate(0) translate(0 -226)"><line x1="-18" y1="-9" x2="18" y2="-9" stroke-width="2.2"/><line x1="-18" y1="0" x2="18" y2="0" stroke-width="1.1"/><line x1="-18" y1="9" x2="18" y2="9" stroke-width="1.7"/></g>
+          <g transform="rotate(45) translate(0 -226)"><line x1="-18" y1="-9" x2="18" y2="-9" stroke-width="1.8"/><line x1="-16" y1="0" x2="-3" y2="0" stroke-width="1.2"/><line x1="3" y1="0" x2="16" y2="0" stroke-width="1.2"/><line x1="-18" y1="9" x2="18" y2="9" stroke-width="1"/></g>
+          <g transform="rotate(90) translate(0 -226)"><line x1="-18" y1="-9" x2="-4" y2="-9" stroke-width="1.4"/><line x1="4" y1="-9" x2="18" y2="-9" stroke-width="1.4"/><line x1="-18" y1="0" x2="18" y2="0" stroke-width="2"/><line x1="-18" y1="9" x2="-4" y2="9" stroke-width="1.1"/><line x1="4" y1="9" x2="18" y2="9" stroke-width="1.1"/></g>
+          <g transform="rotate(135) translate(0 -226)"><line x1="-18" y1="-9" x2="-4" y2="-9" stroke-width="1.2"/><line x1="4" y1="-9" x2="18" y2="-9" stroke-width="1.2"/><line x1="-18" y1="0" x2="-4" y2="0" stroke-width="1.6"/><line x1="4" y1="0" x2="18" y2="0" stroke-width="1.6"/><line x1="-18" y1="9" x2="18" y2="9" stroke-width="2"/></g>
+          <g transform="rotate(180) translate(0 -226)"><line x1="-18" y1="-9" x2="-4" y2="-9" stroke-width="1.5"/><line x1="4" y1="-9" x2="18" y2="-9" stroke-width="1.5"/><line x1="-18" y1="0" x2="-4" y2="0" stroke-width="1"/><line x1="4" y1="0" x2="18" y2="0" stroke-width="1"/><line x1="-18" y1="9" x2="-4" y2="9" stroke-width="1.8"/><line x1="4" y1="9" x2="18" y2="9" stroke-width="1.8"/></g>
+          <g transform="rotate(225) translate(0 -226)"><line x1="-18" y1="-9" x2="18" y2="-9" stroke-width="1.2"/><line x1="-18" y1="0" x2="-4" y2="0" stroke-width="1.5"/><line x1="4" y1="0" x2="18" y2="0" stroke-width="1.5"/><line x1="-18" y1="9" x2="-4" y2="9" stroke-width="1"/><line x1="4" y1="9" x2="18" y2="9" stroke-width="1"/></g>
+          <g transform="rotate(270) translate(0 -226)"><line x1="-18" y1="-9" x2="-4" y2="-9" stroke-width="1.3"/><line x1="4" y1="-9" x2="18" y2="-9" stroke-width="1.3"/><line x1="-18" y1="0" x2="18" y2="0" stroke-width="1.9"/><line x1="-18" y1="9" x2="18" y2="9" stroke-width="1.1"/></g>
+          <g transform="rotate(315) translate(0 -226)"><line x1="-18" y1="-9" x2="18" y2="-9" stroke-width="2"/><line x1="-18" y1="0" x2="18" y2="0" stroke-width="1.2"/><line x1="-18" y1="9" x2="-4" y2="9" stroke-width="1.4"/><line x1="4" y1="9" x2="18" y2="9" stroke-width="1.4"/></g>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="工作区">
+      <a class="side-brand" href="../app/index.html" aria-label="知几启动页">
+        <span class="side-logo">知几</span>
+        <span class="side-sub">命 · 运 · 事</span>
+      </a>
+      <button class="side-new" id="new-ask" type="button">＋ 新问事</button>
+      <nav class="side-nav" aria-label="侧栏">
+        <button id="side-profiles" type="button"><span>命主档案</span><small>人</small></button>
+        <button id="side-plugins" type="button"><span>插件</span><small>器</small></button>
+        <button id="side-files" type="button"><span>本地文件</span><small>卷</small></button>
+      </nav>
+      <section class="side-block">
+        <div class="side-label">最近问事</div>
+        <div class="recent-list" id="recent-list"></div>
+      </section>
+      <section class="side-block" id="calendar-side" hidden>
+        <div class="side-label">近事</div>
+        <div class="calendar-side-list" id="calendar-side-list"></div>
+      </section>
+      <div class="side-foot">
+        <button class="side-link" id="side-about" type="button">凡例</button>
+        <button class="side-link" id="side-settings" type="button">设置</button>
+      </div>
+    </aside>
+
+    <div class="main-pane">
+      <header class="masthead">
+        <div class="topbar-title">
+          <span class="topbar-name">问事台</span>
+          <span class="topbar-profile" id="topbar-profile"></span>
+        </div>
+        <nav aria-label="主导航">
+          <a href="../app/index.html">启动页</a>
+          <button class="nav-button" id="about-open" type="button">凡例</button>
+          <button class="nav-button" id="settings-open" type="button" hidden>设置</button>
+        </nav>
+      </header>
+
+      <main class="stage" id="stage">
+        <section class="empty-state" id="empty" aria-label="问事">
+          <h1 class="hero-title">一庭风动竹，<br>半砚水涵星。</h1>
+          <p class="hero-sub">从眼前的一件事问起。</p>
+          <div class="near-events" id="near-events" hidden></div>
+          <div class="quick-row" id="quick-row"></div>
+        </section>
+        <section class="thread" id="thread" hidden aria-live="polite" aria-relevant="additions"></section>
+        <p class="sr-only" id="talk-status" role="status"></p>
+      </main>
+
+      <div class="dock">
+        <div class="context-chips" id="context-chips" hidden></div>
+        <form class="altar" id="composer">
+          <svg class="feibai" viewBox="0 0 960 28" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M6 16 C 70 6, 120 22, 210 12 S 360 4, 470 15 640 24, 760 10 900 6, 954 14" fill="none" stroke="#527766" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M30 18 C 140 22, 240 8, 390 16 S 620 6, 800 18 920 12, 950 16" fill="none" stroke="#887143" stroke-width=".6" stroke-linecap="round" opacity=".55"/>
+          </svg>
+          <div class="altar-row">
+            <div class="profile-anchor">
+              <button class="profile-capsule" id="profile-capsule" type="button" aria-expanded="false" aria-controls="profile-panel">立命主档案 ▾</button>
+              <div class="profile-panel" id="profile-panel" hidden>
+                <div class="profile-list" id="profile-list" role="listbox" aria-label="已存命主"></div>
+                <button class="text-button" id="profile-new" type="button">新的命主</button>
+                <label>出生日期
+                  <input type="date" id="profile-date" min="1900-01-01" max="2100-12-31">
+                </label>
+                <label>出生时辰
+                  <select id="profile-hour"></select>
+                </label>
+                <p class="hint" id="hour-hint" hidden></p>
+                <fieldset>
+                  <legend>性别</legend>
+                  <div class="segments">
+                    <label><input type="radio" name="pgender" value="女" checked><span>女</span></label>
+                    <label><input type="radio" name="pgender" value="男"><span>男</span></label>
+                  </div>
+                </fieldset>
+                <p class="error" id="profile-error" role="alert" hidden></p>
+                <button class="text-button danger" id="profile-delete" type="button">删除这份档案</button>
+              </div>
+            </div>
+            <label class="sr-only" for="question">要问的事</label>
+            <textarea id="question" rows="1" maxlength="300" placeholder="问一件具体的事" required></textarea>
+            <button class="seal-ask" type="submit" aria-label="问">问</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <p class="yijing">知几其神乎！君子上交不谄，下交不渎，其知几乎？几者，动之微，吉之先见者也。——《易·系辞下》</p>
+
+  <dialog class="ink-dialog" id="about-dialog">
+    <form method="dialog">
+      <header class="dialog-heading">
+        <h2>凡例</h2>
+        <button class="text-button" type="submit">关闭</button>
+      </header>
+      <div class="about-grid">
+        <article><h3>命与事分开</h3><p>紫微看长期结构与倾向；奇门看你发出问题时的时空格局。两层回答不同的问题，不把分数硬平均，也不伪造唯一结论。</p></article>
+        <article><h3>事实与解释分开</h3><p>星曜、宫位、四化、八门、九星、八神来自本机排盘。人话由模型组织。每条回复右上角可展开双盘原局，事实以引擎为准。</p></article>
+        <article><h3>时辰不详</h3><p>选「时辰不详」时，不排紫微命宫，也不编造时辰盘。只把奇门当下起局和公历年月日交给会诊，以奇门断事为主。结尾可以做「三问定盘」：按当天不同时辰的命宫主星，问两到三个经历题，把最接近的一档写回档案。这是收窄，不是鉴定。</p></article>
+        <article><h3>模糊时段</h3><p>清晨含寅至辰（约 03:00–08:59），上午巳至午，午后未至申，傍晚酉至戌，深夜亥至丑（约 21:00–02:59，含早子与晚子）。该时段内每个时辰各排一次，只取共同趋势；对不上的地方会明说。</p></article>
+        <article><h3>档案存在哪里</h3><p>命主档案只写在这台电脑的本地存储里，可存多份、随时切换。问事时读取当前这一份，在本机算出盘面，再连同问题发给 n8n。</p></article>
+        <article><h3>这一版的范围</h3><p>先做紫微 × 奇门，八字以后再补。奇门以你发出问题的时刻起局。这是传统文化与决策反思工具，不是经过验证的预测系统。不做医疗、法律、投资、生死断言。</p></article>
+      </div>
+      <p class="sources">排盘：<a href="https://github.com/SylarLong/iztro" target="_blank" rel="noopener">iztro</a>（MIT） · <a href="https://github.com/3metaJun/3meta" target="_blank" rel="noopener">3meta</a>（MIT）</p>
+    </form>
+  </dialog>
+
+  <dialog class="ink-dialog" id="settings-dialog">
+    <form id="settings-form">
+      <header class="dialog-heading">
+        <h2>连接会诊</h2>
+        <button class="text-button" id="settings-cancel" type="button">关闭</button>
+      </header>
+      <p class="settings-note">盘面在本机算。问题和盘面发给 n8n，由 n8n 调模型并返回人话。模型钥匙放在 n8n，不放在这个窗口。</p>
+      <label>n8n Webhook 地址
+        <input id="n8n-url" type="url" placeholder="http://127.0.0.1:5678/webhook/zhiji-consult" required>
+      </label>
+      <label>共享密钥（可选）
+        <input id="n8n-secret" type="password" autocomplete="off" placeholder="本地 n8n 可留空">
+      </label>
+      <p class="settings-status" id="settings-status" aria-live="polite"></p>
+      <div class="settings-actions">
+        <button class="seal-ask settings-save" type="submit">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="ink-dialog plugin-dialog" id="plugins-dialog">
+    <form method="dialog">
+      <header class="dialog-heading">
+        <h2>插件</h2>
+        <button class="text-button" type="submit">关闭</button>
+      </header>
+      <p class="settings-note">插件只读取你亲手选中的文件或日历；不上传，不扫描整台电脑。</p>
+      <div class="plugin-grid">
+        <article class="plugin-card">
+          <header class="plugin-head">
+            <h3>本地文件</h3>
+            <label class="plugin-toggle"><input type="checkbox" id="files-enabled"> 启用</label>
+          </header>
+          <p class="plugin-note">选一个文件夹，挑一份 md / txt / json 作为这一问的背景资料。</p>
+          <button class="text-button" id="choose-folder" type="button">选择文件夹</button>
+          <p class="plugin-note" id="workspace-status">未选择文件夹</p>
+          <div class="plugin-list" id="file-list"></div>
+        </article>
+        <article class="plugin-card">
+          <header class="plugin-head">
+            <h3>日历</h3>
+            <label class="plugin-toggle"><input type="checkbox" id="calendar-enabled"> 启用</label>
+          </header>
+          <p class="plugin-note">导入 .ics 日历，提醒你近期的生日、纪念日和约定；只读。</p>
+          <button class="text-button" id="choose-calendar" type="button">选择 .ics 文件</button>
+          <p class="plugin-note" id="calendar-status">未导入日历</p>
+          <div class="plugin-list" id="calendar-list"></div>
+        </article>
+      </div>
+      <p class="sources">本地文件与日历只在桌面端可用；浏览器模式会提示未连接。</p>
+    </form>
+  </dialog>
+
+  <script src="vendor/iztro.js"></script>
+  <script src="vendor/3meta.min.js"></script>
+  <script src="chart-core.js"></script>
+  <script src="lab.js"></script>
+</body>
+</html>

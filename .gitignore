@@ -1,0 +1,8 @@
+.env
+lab/.env
+node_modules/
+.pnpm-store/
+dist/
+release/
+*.log
+.DS_Store

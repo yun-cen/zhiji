@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f6f2">
+  <title>知几</title>
+  <link rel="icon" href="../assets/zhiji-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+  <div class="boot" id="boot"><span class="seal tint-cinnabar">几</span></div>
+
+  <section class="welcome" id="welcome" hidden>
+    <div class="welcome-card">
+      <span class="seal tint-cinnabar welcome-seal">几</span>
+      <p class="poem">一庭风动竹，<br>半砚水涵星。</p>
+      <p class="welcome-lead">先留下称呼和头像。出生资料等第一次问盘时再填。头像是你，命主档案是这次给谁看。</p>
+      <label class="field">怎么称呼你
+        <input id="welcome-name" maxlength="16" autocomplete="nickname" placeholder="一个名字就好">
+      </label>
+      <div class="picker-label">选一枚印章，或用一张照片</div>
+      <div class="avatar-picker" id="welcome-picker"></div>
+      <p class="form-error" id="welcome-error" role="alert" hidden></p>
+      <button class="enter" id="welcome-enter" type="button">进入知几</button>
+    </div>
+  </section>
+
+  <div class="shell" id="shell" hidden>
+    <nav class="rail" aria-label="知几">
+      <button class="rail-btn is-current" id="rail-chats" type="button" aria-label="消息" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.2h14v8.6H8.4L5 17.6V6.2z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        <span class="rail-label">消息</span>
+      </button>
+      <button class="rail-btn" id="rail-profiles" type="button" aria-label="命主">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M6.6 18.2c1.1-2 2.9-3 5.4-3s4.3 1 5.4 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span class="rail-label">命主</span>
+      </button>
+      <span class="rail-spacer"></span>
+      <button class="rail-user" id="side-user" type="button" aria-label="设置"><span id="side-avatar"></span></button>
+    </nav>
+    <aside class="sidebar" id="sidebar" aria-label="会话">
+      <header class="side-head">
+        <span class="side-title">消息</span>
+        <div class="side-tools">
+          <button class="icon-btn" id="new-chat" type="button" aria-expanded="false" aria-controls="new-menu" aria-label="新会话">+</button>
+          <button class="icon-btn" id="collapse-list" type="button" aria-label="收起会话栏">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+          <div class="popover" id="new-menu" hidden>
+          <button type="button" data-new="zhiji">和知几另起一段</button>
+          <button type="button" data-new="ziwei">私聊紫微</button>
+          <button type="button" data-new="qimen">私聊奇门</button>
+          <button type="button" data-new="group">建一个群</button>
+        </div>
+        </div>
+      </header>
+      <div class="list-card">
+      <label class="search">
+        <span class="sr-only">搜索会话</span>
+        <input id="search" type="search" placeholder="搜索会话" autocomplete="off">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M16 16.5 20 20.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      </label>
+      <div id="pin-slot"></div>
+      <div class="side-section">
+        <button class="section-toggle" id="section-toggle" type="button">消息</button>
+      </div>
+      <div class="conv-scroll" id="conv-list"></div>
+      <figure class="origin-quote">
+        <blockquote>知几其神乎！君子上交不谄，下交不渎，其知几乎？几者，动之微，吉之先见者也。</blockquote>
+        <figcaption>——《易·系辞下》</figcaption>
+      </figure>
+      </div>
+    </aside>
+
+    <section class="chat-pane">
+      <div class="pane-tools">
+        <button class="icon-btn" id="restore-list" type="button" hidden aria-label="展开会话栏">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" id="detail-toggle" type="button" aria-label="会话详情">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="title-chip" id="title-chip"></div>
+      <div class="chat-card">
+      <div class="transcript-wrap">
+        <div class="transcript" id="transcript" aria-live="polite"></div>
+        <div class="composer-wrap" id="composer-wrap">
+          <form class="composer" id="composer">
+            <div class="mention-menu" id="mention-menu" hidden></div>
+            <div class="composer-peek" id="composer-peek" aria-hidden="true"><img src="aji/face.png" alt=""></div>
+            <label class="sr-only" for="draft">要说的话</label>
+            <textarea id="draft" rows="1" maxlength="600" placeholder="给知几发消息"></textarea>
+            <div class="attach-row" id="attach-row" hidden></div>
+            <div class="composer-bar">
+              <button class="icon-btn" id="composer-attach" type="button" aria-label="添加附件">+</button>
+              <input id="attach-input" type="file" multiple hidden>
+              <button class="model-switch" id="model-switch" type="button">本机 · 本地模型 · 快速</button>
+              <div class="model-pop" id="model-pop" hidden>
+                <div class="effort" id="effort">
+                  <button type="button" data-effort="fast">快速</button>
+                  <button type="button" data-effort="careful">细读</button>
+                </div>
+                <div id="model-list"></div>
+                <button type="button" id="more-profile">命主档案</button>
+                <button type="button" id="invite">请两位参看</button>
+                <button type="button" id="more-recast">重新起局</button>
+                <button type="button" id="more-cases">盘例评测</button>
+                <button type="button" id="open-api">自带 API</button>
+                <button type="button" id="open-hf">去 Hugging Face 选模型</button>
+                <button type="button" id="run-trial">试答这三题</button>
+                <p id="trial-line"></p>
+              </div>
+              <p class="voice-line" id="voice-line" hidden></p>
+              <button class="send is-mic" id="voice" type="button" aria-label="开始录音">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="4" width="6" height="10" rx="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M7 11a5 5 0 0 0 10 0M12 16v3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              </button>
+              <button class="text" id="voice-cancel" type="button" hidden>取消</button>
+              <button class="send" id="voice-stop" type="button" hidden aria-label="结束录音">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="8" height="8" rx="1.5" fill="currentColor"/></svg>
+              </button>
+              <button class="send" id="send" type="submit" aria-label="发送">
+                <svg class="go-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6M6.5 11.5 12 6l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg class="stop-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="8" height="8" rx="1.5" fill="currentColor"/></svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <aside class="drawer" id="drawer" hidden aria-label="盘面依据"></aside>
+      </div>
+    </section>
+  </div>
+
+  <dialog class="sheet" id="profile-dialog">
+    <form class="sheet-card" id="profile-form">
+      <header class="sheet-head">
+        <h2>命主档案</h2>
+        <button class="text" type="button" id="profile-close">关闭</button>
+      </header>
+      <p class="sheet-note">头像是正在用知几的人。这里是给谁排盘，可以是你，也可以是家人。问事之前可以先不填。</p>
+      <div class="profile-layout">
+        <div class="profile-list" id="profile-list"></div>
+        <div class="profile-fields">
+          <label class="field">档案名字
+            <input id="profile-name" maxlength="16" placeholder="我、妈妈、孩子">
+          </label>
+          <label class="check"><input type="checkbox" id="profile-self"> 这是我自己</label>
+          <label class="field">公历出生日期
+            <input id="profile-date" type="date" min="1900-01-01" max="2100-12-31">
+          </label>
+          <label class="field">出生时辰
+            <select id="profile-hour"></select>
+          </label>
+          <fieldset class="segments">
+            <legend>性别</legend>
+            <label><input type="radio" name="gender" value="女" checked><span>女</span></label>
+            <label><input type="radio" name="gender" value="男"><span>男</span></label>
+          </fieldset>
+          <p class="form-error" id="profile-error" role="alert" hidden></p>
+          <div class="sheet-actions">
+            <button class="enter slim" id="profile-use" type="submit">用于当前会话</button>
+            <button class="text" id="profile-new" type="button">新的命主</button>
+            <button class="text danger" id="profile-delete" type="button">删除</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="sheet" id="settings-dialog">
+    <form class="sheet-card settings-card" id="settings-form">
+      <header class="sheet-head">
+        <h2>设置</h2>
+        <button class="text" type="button" id="settings-close">关闭</button>
+      </header>
+      <label class="field">你的称呼
+        <input id="settings-name" maxlength="16" autocomplete="nickname">
+      </label>
+      <div class="picker-label">你的头像</div>
+      <div class="avatar-picker" id="settings-picker"></div>
+      <label class="field">知几的称呼
+        <input id="settings-agent-name" maxlength="16">
+      </label>
+      <div class="picker-label">知几的印章</div>
+      <div class="seal-choices" id="settings-seals"></div>
+      <fieldset class="segments">
+        <legend>知几怎么回答</legend>
+        <label><input type="radio" name="preference" value="conclusion-first" checked><span>先说结论</span></label>
+        <label><input type="radio" name="preference" value="show-evidence"><span>让我看依据</span></label>
+      </fieldset>
+      <p class="sheet-note">模型在输入框里换。本地没连上时，不会自动改用云端。</p>
+      <p class="form-error" id="settings-error" role="alert" hidden></p>
+      <button class="enter slim" type="submit">保存</button>
+    </form>
+  </dialog>
+
+  <dialog class="sheet" id="api-dialog">
+    <form class="sheet-card" id="api-form">
+      <header class="sheet-head">
+        <h2>自带 API</h2>
+        <button class="text" type="button" id="api-close">关闭</button>
+      </header>
+      <p class="sheet-note">兼容 OpenAI 的接口。密钥只进系统钥匙串。本地失败时不会自己切过来。</p>
+      <label class="field">服务地址
+        <input id="api-base" placeholder="https://api.openai.com" autocomplete="off">
+      </label>
+      <label class="field">模型名
+        <input id="api-model" placeholder="gpt-4.1-mini" autocomplete="off">
+      </label>
+      <label class="field">密钥
+        <input id="api-key" type="password" placeholder="留空则沿用已保存的密钥" autocomplete="off">
+      </label>
+      <p class="sheet-note" id="api-preview">这次会发送当前问题、最近几句对话，以及盘面依据的原文。密钥不会出现在这里。</p>
+      <p class="form-error" id="api-error" role="alert" hidden></p>
+      <div class="sheet-actions">
+        <button class="enter slim" type="submit">保存并用于之后的回答</button>
+        <button class="text" id="api-test" type="button">测试连接</button>
+        <button class="text" id="api-local" type="button">改回本地</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="sheet" id="cases-dialog">
+    <form class="sheet-card cases-card">
+      <header class="sheet-head">
+        <h2>盘例评测</h2>
+        <button class="text" type="button" id="cases-close">关闭</button>
+      </header>
+      <p class="sheet-note" id="cases-school"></p>
+      <div id="cases-body"></div>
+      <p class="form-error" id="cases-error" role="alert" hidden></p>
+      <button class="enter slim" id="cases-model" type="button">用当前模型读六级那一题</button>
+      <p class="sheet-note" id="cases-model-line"></p>
+    </form>
+  </dialog>
+
+  <dialog class="sheet" id="group-dialog">
+    <form class="sheet-card" id="group-form">
+      <header class="sheet-head">
+        <h2>建一个群</h2>
+        <button class="text" type="button" id="group-close">关闭</button>
+      </header>
+      <label class="field">群的名字
+        <input id="group-title" maxlength="16" placeholder="新的群聊">
+      </label>
+      <fieldset class="member-pick">
+        <legend>请哪些人</legend>
+        <label><input type="checkbox" name="member" value="zhiji" checked> 知几</label>
+        <label><input type="checkbox" name="member" value="ziwei" checked> 紫微</label>
+        <label><input type="checkbox" name="member" value="qimen"> 奇门</label>
+      </fieldset>
+      <p class="form-error" id="group-error" role="alert" hidden></p>
+      <button class="enter slim" type="submit">建立</button>
+    </form>
+  </dialog>
+
+  <dialog class="sheet" id="crop-dialog">
+    <form class="sheet-card" id="crop-form">
+      <header class="sheet-head">
+        <h2>裁成方形头像</h2>
+        <button class="text" type="button" id="crop-close">取消</button>
+      </header>
+      <div class="crop-stage" id="crop-stage"></div>
+      <label class="field">缩放
+        <input id="crop-zoom" type="range" min="1" max="3" step="0.01" value="1">
+      </label>
+      <p class="sheet-note">拖动照片，让脸落在方框里。列表、标题栏和消息旁用的是同一块。</p>
+      <button class="enter slim" type="submit">用这块</button>
+    </form>
+  </dialog>
+
+  <script src="../lab/vendor/iztro.js"></script>
+  <script src="../lab/vendor/3meta.min.js"></script>
+  <script src="../lab/chart-core.js"></script>
+  <script src="turn.js"></script>
+  <script src="chat.js"></script>
+</body>
+</html>

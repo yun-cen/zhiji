@@ -1,0 +1,44 @@
+{
+  "name": "zhiji-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "知几 · 命·运·事三盘会诊 macOS app",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --mac dmg"
+  },
+  "devDependencies": {
+    "electron": "^45.4.1",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "studio.tianshuiyirang.zhiji",
+    "productName": "知几",
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**",
+      "app/**",
+      "lab/**",
+      "assets/**",
+      "art/**",
+      "index.html",
+      "styles.css",
+      "reading.css",
+      "fonts.css",
+      "iztro.js",
+      "star-library.js",
+      "reading-library.js",
+      "reading.js",
+      "app.js",
+      "package.json"
+    ],
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.lifestyle"
+    }
+  }
+}

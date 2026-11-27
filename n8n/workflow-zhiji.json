@@ -1,0 +1,234 @@
+{
+  "name": "知几 · 算命大脑",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "zhiji-consult",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "626cd646-751d-4356-9e58-dfe425bd34dd",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -260,
+        0
+      ],
+      "webhookId": "b72179e9-e291-4d05-9a07-b843cf0fca98"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json || {};\nconst body = raw.body && typeof raw.body === 'object' ? raw.body : raw;\nconst question = String(body.question || '').trim();\nconst domain = String(body.domain || 'career');\nconst facts = body.facts && typeof body.facts === 'object' ? body.facts : {};\nif (!question) {\n  return [{ json: { error: 'missing question' } }];\n}\n\nlet timeMode = String(body.timeMode || facts.timeMode || 'exact');\nif (body.timeUnknown === true || facts.timeUnknown === true) timeMode = 'unknown';\n\nconst domainGuide = {\n  career: '事业/合作：先判断长期结构是否适配，再看当下这件事是否值得推进；给条件和节点，不替用户拍板。',\n  wealth: '财富/投入：先看现金流和风险承受，再看投入产出；不做投资建议。',\n  relationship: '亲密/关系：先看边界、沟通和承诺，不预测分手、结婚或具体对象。',\n  travel: '迁移/出行：先看环境变化、外部机会和落脚点，不保证某次出行的结果。',\n  study: '学业/考试：看长期学习方式、当下复习节奏和考场状态；不预测分数、排名或录取，只给准备策略和止损。',\n  timing: '时机：重点回答该动还是该等，给出触发条件和止损点。'\n}[domain] || '把长期结构和当下这件事分开说，不替用户做决定。';\n\nconst sectionStyle = {\n  study: '建议分段：这次考试的关键 / 你现在的位置 / 考前这段怎么用 / 考场上最怕的变量 / 什么会改变这个判断。不要用“一句话/为什么这么说/你可以怎么做”。',\n  career: '建议分段：该不该动 / 长期结构 / 当下窗口 / 动的条件 / 什么会改变这个判断。',\n  wealth: '建议分段：这笔钱的关键 / 长期与当下 / 先动哪一步 / 什么情况下收手。',\n  relationship: '建议分段：这段关系的卡点 / 长期与当下 / 你可以试的下一步 / 边界 / 什么会改变这个判断。',\n  travel: '建议分段：这次动的关键 / 外部环境 / 什么时候动 / 什么情况下不动。',\n  timing: '建议分段：现在的位置 / 窗口 / 该动还是等 / 触发条件与止损。'\n}[domain] || '按问题本身分段，不要套固定模板。';\n\nconst timeline = body.timeline && typeof body.timeline === 'object' ? body.timeline : null;\nconst tags = body.tags && typeof body.tags === 'object' ? body.tags : {};\n\nconst guide = facts.readingGuide || (timeMode === 'unknown'\n  ? '出生时辰不详。facts 里没有紫微命宫，禁止编造命宫、主星、四化、大限或时辰盘。这一问以奇门断事为主，不要描写长期行事风格的星盘细节；三问定盘的收窄入口由界面提供，不要在正文里自行展开。'\n  : timeMode === 'fuzzy'\n    ? '只知道一个模糊时段。ziwei.variants 是该时段内每个时辰各排一次的摘要。只采用交集：多数时辰共同指向的倾向才可以说；彼此矛盾就写明这个时段里并不一致。不要挑其中一个时辰当成出生时辰。'\n    : '时辰已定。紫微看长期结构，奇门看此刻这件事。两盘不一致时分开说，不要折成一句吉或凶。');\n\nconst history = Array.isArray(body.history)\n  ? body.history.slice(-6).map((item) => ({\n      role: item && item.role === 'assistant' ? 'assistant' : 'user',\n      content: String(item && item.content || '').slice(0, 1200)\n    })).filter((item) => item.content)\n  : [];\n\nconst context = body.context && typeof body.context === 'object' ? body.context : {};\n\nconst evidence = Array.isArray(body.evidence)\n  ? body.evidence.slice(0, 12).map((item) => ({\n      id: String(item && item.id || ''),\n      system: String(item && item.system || ''),\n      label: String(item && item.label || ''),\n      fact: String(item && item.fact || ''),\n      stability: String(item && item.stability || 'exact')\n    })).filter((item) => item.id && item.label)\n  : [];\n\nconst system = [\n  '你是「知几」，一个把紫微斗数（长期结构）与奇门遁甲（当下时空）放在同一张桌上的决策会诊助手。',\n  '最高原则：默认输出“人话版”。用户不需要懂命理术语，也能看懂并拿去用。',\n  '硬性规则：',\n  '1. 只能使用提供的结构化盘面 facts；不得新增不存在的星曜、宫位、四化、门、星、神、局数、格局。',\n  '2. 默认回答里不要出现星曜名、宫位名、八门/九星/八神名、四化、局数。把这些留给“展开原理”。',\n  '3. 如果某个术语无法避免，先用一句人话解释，再在括号里写术语。',\n  '4. 不要使用“科学证明”“准确率”“命中率”“一定”“必然”。不要预测具体事件，不做医疗、法律、投资、生死断言。',\n  '5. 只输出一个 JSON 对象，不要 Markdown 代码块，不要 JSON 之外的任何字。结构：',\n  '{\"sections\":[{\"title\":\"按问题自己写的标题\",\"text\":\"人话\",\"evidence\":[\"E1\"]},{\"title\":\"另一个具体标题\",\"items\":[\"动作\"],\"evidence\":[\"E2\"]}]}',\n  '6. 写 3-5 段，标题必须贴着这一问，不要机械使用“一句话/为什么这么说/你可以怎么做”。' + sectionStyle,\n  '6.1 结构上至少要有：一个直接判断（带条件）；一个长期/当下或关键变量；一个具体动作；一段“什么会改变这个判断/还缺什么”。',\n  '6.2 只有在缺一个会改变结论的现实事实时，才加最后一段「先确认一件事」，给 2-3 个选项；否则不要加问题段。',\n  '6.3 每个有判断的 section 必须带 evidence；evidence 只能从目录里选，最多两个。items 只能是字符串数组；evidence 必须放在 section 对象上，不能放进 items。',\n  '6.4 每个 section 必须有非空的 text 或 items；动作段至少给 2 条具体动作。没有内容就不要生成这个标题。',\n  '7. 语气像坐在对面说话：短句、具体、少形容词。',\n  '7.1 如果 history 里已有相似问题，不要复用句式或建议；这一问的考试类型、时间窗口、对象不同，动作必须不同。',\n  '8. 如果 facts 不足以支持判断，直接说这层信息不足，不要编。',\n  '9. ' + guide,\n  '10. ' + domainGuide,\n  '11. 历史对话只作上下文；优先回答用户当前这一问，不要复述旧答案，也不要把旧答案里的判断直接套到新问题上。',\n  '12. 写完先自查：正文里有没有星曜名、宫位名、八门/九星/八神名、四化、局数？如果有，整段改成人话，术语只能留在 JSON 的 evidence ID 里。',\n  '13. evidence 的 stability 是 common 时说明“多时辰一致”；是 varies 时说明“会随时辰改变”；是 withheld 时说明“这层不能看”。',\n  '14. timeline 是用户问题指向的未来窗口（如“下周”“下个月”）。奇门是发问此刻的局，不得说成考试/事件当天的局；把窗口与当前日期对齐，动作要落到这个窗口。',\n  '15. context.calendar / context.file 只是用户提供的现实背景，不是盘面 facts。不要编造日历事件或文件内容；如果日历里有临近日程，可以在建议里提一句，但不要喧宾夺主。',\n  '16. tags.exam 是考试类型。六级/四级优先说听力、阅读、写作、翻译；期末/期中优先说课程范围、老师重点、记忆量；考研优先说长线节奏。不要把一类考试的建议套到另一类。'\n].join('\\n');\n\nconst user = [\n  '问题：' + question,\n  '领域：' + domain,\n  '时辰状态：' + timeMode,\n  '',\n  '结构化盘面 facts（只可使用这些）：',\n  JSON.stringify(facts, null, 2),\n  '',\n  '可引用依据（正文只能用这些 ID）：',\n  JSON.stringify(evidence, null, 2),\n  '',\n  '本地上下文（只作辅助，不是盘面 facts）：',\n  JSON.stringify(context, null, 2),\n  '',\n  '问题指向的时间窗口：',\n  JSON.stringify(timeline, null, 2),\n  '',\n  '问题标签：',\n  JSON.stringify(tags, null, 2)\n].join('\\n');\n\nreturn [{ json: { messages: [\n  { role: 'system', content: system },\n  ...history,\n  { role: 'user', content: user }\n] } }];\n"
+      },
+      "id": "590ed899-7f38-49f8-9d83-8d8a2301d293",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'glm-4-plus', messages: $json.messages, temperature: 0.4, max_tokens: 2400, response_format: { type: 'json_object' } }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "b6899248-95f1-4539-8e8d-ffb3806729a5",
+      "name": "Zhipu Chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_ZHIPU_HEADER_AUTH_ID",
+          "name": "Zhipu Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json || {};\nlet raw = data?.choices?.[0]?.message?.content || '';\nif (!raw) return [{ json: { error: 'empty completion' } }];\nlet text = String(raw).trim();\ntext = text.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/i, '').trim();\nlet parsed = null;\ntry { parsed = JSON.parse(text); } catch {}\nif (!parsed || !Array.isArray(parsed.sections)) {\n  if (!text) return [{ json: { error: 'empty completion' } }];\n  return [{ json: {\n    content: text,\n    sections: [{ title: '会诊', text, items: [], evidence: [], options: [] }],\n    model: data.model || 'glm-4-plus'\n  } }];\n}\nconst sections = parsed.sections\n  .filter((section) => section && typeof section.title === 'string')\n  .slice(0, 8)\n  .map((section) => ({\n    title: String(section.title).slice(0, 40),\n    text: typeof section.text === 'string' ? section.text.slice(0, 2000) : '',\n    items: Array.isArray(section.items) ? section.items.slice(0, 4).map((item) => String(item).slice(0, 300)) : [],\n    evidence: Array.isArray(section.evidence) ? section.evidence.filter((id) => /^E\\d+$/.test(String(id))).slice(0, 3).map(String) : [],\n    options: Array.isArray(section.options) ? section.options.slice(0, 4).map((option) => String(option).slice(0, 120)) : []\n  }))\n  .filter((section) => section.text.trim() || section.items.length || section.options.length);\nreturn [{ json: { content: text, sections, model: data.model || 'glm-4-plus' } }];"
+      },
+      "id": "fd7e48a9-d6de-40c3-b630-31ac0dcece8d",
+      "name": "Extract Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json || {};\nconst sections = Array.isArray(data.sections) ? data.sections : null;\nconst system = [\n  '你是「知几」的定稿编辑。输入是一份结构化会诊 JSON。',\n  '只改写每个 section 的 text 和 items；不要改 title、evidence、options。',\n  '硬性要求：',\n  '1. 正文不得出现星曜名、宫位名、四化、八门/九星/八神、局数、术语；原句有术语就整句改成人话，不要保留括号解释。常见禁用词包括：紫微、官禄、命宫、迁移、夫妻、财帛、七杀、贪狼、廉贞、天机、太阴、太阳、武曲、天同、天府、天相、天梁、巨门、破军、四化、化禄、化权、化科、化忌、大限、流年、开门、休门、生门、死门、景门、杜门、惊门、伤门、值符、值使、九星、八神、天盘、地盘、局数。',\n  '2. 不新增原 JSON 没有的判断；保留条件、分歧、动作和边界。',\n  '3. 每个 section 的 evidence 数组原样保留，不要增加、删除或修改。',\n  '4. 只输出一个 JSON 对象，不要 Markdown 代码块，不要 JSON 之外的任何字。',\n  '5. 短句、具体、像坐在对面说话；不要“综合来看”“从多个维度”。',\n  '6. 如果原句无法在不损失意思的情况下改成人话，宁可删掉术语短语，也不要保留术语。',\n  '7. 不要新增 facts 里没有的具体时辰、日期、方位或数字建议。'\n].join('\\n');\nconst user = '待改写的会诊 JSON：\\n' + JSON.stringify(sections, null, 2);\nreturn [{ json: { sections, messages: [\n  { role: 'system', content: system },\n  { role: 'user', content: user }\n] } }];"
+      },
+      "id": "44e10d9a-8b16-4502-9f9f-232c2e9f7768",
+      "name": "Build Plain Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'glm-4-plus', messages: $json.messages, temperature: 0.2, max_tokens: 2400, response_format: { type: 'json_object' } }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "37cbfe4b-bbd3-4897-800c-11aad26ad3c3",
+      "name": "Plain Rewrite",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        920,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_ZHIPU_HEADER_AUTH_ID",
+          "name": "Zhipu Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const original = $('Build Plain Request').first().json.sections || [];\nconst data = $input.first().json || {};\nlet raw = data?.choices?.[0]?.message?.content || '';\nlet text = String(raw).trim().replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/i, '').trim();\nlet parsed = null;\ntry { parsed = JSON.parse(text); } catch {}\nconst rewritten = Array.isArray(parsed?.sections) ? parsed.sections : Array.isArray(parsed) ? parsed : [];\nconst sections = original.map((section, index) => {\n  const next = rewritten[index] || {};\n  return {\n    ...section,\n    text: typeof next.text === 'string' ? next.text.slice(0, 2000) : section.text,\n    items: Array.isArray(next.items) ? next.items.slice(0, 4).map((item) => String(item).slice(0, 300)) : section.items\n  };\n}).filter((section) => section.text.trim() || (section.items || []).length || (section.options || []).length);\nconst readable = sections.map((section) => {\n  const body = section.text || (section.items || []).map((item) => '- ' + item).join('\\n');\n  return '## ' + section.title + '\\n' + body;\n}).join('\\n\\n');\nreturn [{ json: { sections, content: readable, model: data.model || 'glm-4-plus' } }];"
+      },
+      "id": "19c304bc-0fe6-403c-9bcf-767a5d1e34b9",
+      "name": "Extract Plain",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1140,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ content: $json.content, sections: $json.sections, model: $json.model }) }}",
+        "options": {}
+      },
+      "id": "5ac5bb92-49ac-4287-a739-5fff6c6dd116",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1380,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          {
+            "node": "Zhipu Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zhipu Chat": {
+      "main": [
+        [
+          {
+            "node": "Extract Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Reply": {
+      "main": [
+        [
+          {
+            "node": "Build Plain Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Plain Request": {
+      "main": [
+        [
+          {
+            "node": "Plain Rewrite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plain Rewrite": {
+      "main": [
+        [
+          {
+            "node": "Extract Plain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Plain": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3aa479a5-fd1c-46f5-9a0c-d52b7cc618a9",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [],
+  "pinData": {}
+}

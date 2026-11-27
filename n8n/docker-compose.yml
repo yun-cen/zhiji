@@ -1,0 +1,21 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: zhiji-n8n
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      - N8N_HOST=127.0.0.1
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://127.0.0.1:5678/
+      - GENERIC_TIMEZONE=Asia/Shanghai
+      - N8N_SECURE_COOKIE=false
+      # 换成你自己的长随机串；它用于加密 n8n 里的凭证
+      - N8N_ENCRYPTION_KEY=change-this-to-a-long-random-string
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+volumes:
+  n8n_data:

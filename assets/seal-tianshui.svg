@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="天水一壤印">
+  <rect width="200" height="200" rx="6" fill="#a52a2a"/>
+  <rect x="9" y="9" width="182" height="182" rx="3" fill="none" stroke="#f3e5cc" stroke-width="4" opacity=".82"/>
+  <rect x="17" y="17" width="166" height="166" rx="2" fill="none" stroke="#f3e5cc" stroke-width="1.4" opacity=".55"/>
+  <g fill="#f3e5cc" font-family="Kaiti SC, KaiTi, STKaiti, Songti SC, serif" font-weight="700" text-anchor="middle">
+    <text x="63" y="88" font-size="52">天</text>
+    <text x="137" y="88" font-size="52">水</text>
+    <text x="63" y="158" font-size="52">一</text>
+    <text x="137" y="158" font-size="52">壤</text>
+  </g>
+  <path d="M20 20h12M20 20v12M180 20h-12M180 20v12M20 180h12M20 180v-12M180 180h-12M180 180v-12" stroke="#f3e5cc" stroke-width="2" opacity=".5"/>
+</svg>
