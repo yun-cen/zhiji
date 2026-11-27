@@ -97,6 +97,14 @@ scripts/build-macos-app.sh /path/to/Electron.app
 ```bash
 INSTALL_DIR="$HOME/Applications" scripts/build-macos-app.sh /path/to/Electron.app
 ```
+## Windows 开发与打包
+
+上面的打包流程面向 macOS。在 Windows 上：
+
+- 开发调试一样：`pnpm install`，然后 `pnpm start`；
+- 打包 Windows 安装包：`pnpm dist:win`（新增命令，输出在 `release/` 目录，生成 NSIS `.exe` 安装包）；
+- Electron 二进制下载慢时可用镜像：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install`；
+- 平台差异：系统通知、safeStorage、开机启动等在 Windows 与 macOS 上行为不同，涉及这些功能的改动需要双平台各测一遍。
 
 ## 现在完成到哪一步
 
