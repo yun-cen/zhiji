@@ -4,9 +4,10 @@
   "private": true,
   "description": "知几 · 命·运·事三盘会诊 macOS app",
   "main": "electron/main.js",
-  "scripts": {
+    "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --mac dmg"
+    "dist": "electron-builder --mac dmg",
+    "dist:win": "electron-builder --win nsis"
   },
   "devDependencies": {
     "electron": "^45.4.1",
