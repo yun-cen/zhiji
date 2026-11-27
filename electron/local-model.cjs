@@ -119,11 +119,11 @@ function classifyStream({ text, finishReason, failed }) {
   return { ok: true, text: body, finish: 'stop' };
 }
 function tokenBudget(task, evidence) {
-  if (task === 'chat' || task === 'ask' || task === 'offer') return 220;
-  if (task === 'summarize') return 800;
+  if (task === 'chat' || task === 'ask' || task === 'offer') return 260;
+  if (task === 'summarize') return 1100;
   const systems = new Set((evidence || []).map((item) => item && item.system).filter(Boolean));
-  if (systems.has('ziwei') && systems.has('qimen')) return 1200;
-  return 800;
+  if (systems.has('ziwei') && systems.has('qimen')) return 1800;
+  return 1100;
 }
 function abortKind(signal) {
   if (!signal || !signal.aborted) return '';
@@ -517,7 +517,7 @@ async function startLocalModel(modelId) {
     await runCapture(lms, ['server', 'start', '--port', '1234'], 45000);
     if (!(await modelStatus(id)).ok) return { ok: false, message: 'LM Studio 服务未能在本机 1234 端口启动。' };
   }
-  const result = await runCapture(lms, ['load', id, '--context-length', '8192', '--parallel', '1', '-y'], 180000);
+  const result = await runCapture(lms, ['load', id, '--context-length', '16384', '--parallel', '1', '-y'], 180000);
   const status = await modelStatus(id);
   if (status.ready) return { ok: true, model: id, message: '本地模型已就绪。' };
   const reason = result.code === 124 ? '加载超时' : (result.err || result.out || '未发现已加载实例').trim().slice(-320);
