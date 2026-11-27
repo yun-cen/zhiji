@@ -6,6 +6,7 @@
   --ink: hsl(60 8% 9.4%);
   --muted: hsl(55 6% 42.5%);
   --line: hsl(72 9% 92%);
+  --rule: hsl(72 10% 86%);
   --bubble: hsl(60 16% 95% / 0.7);
   --brand: #3a523c;
   --card-shadow: 0 0 0 1px rgb(0 0 0 / 5%), 0 1px 2px rgb(0 0 0 / 4%), 0 6px 20px rgb(0 0 0 / 6%);
@@ -16,6 +17,16 @@
   --song: "Songti SC", "STSong", "Songti TC", serif;
   --sans: "PingFang SC", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", sans-serif;
   --seal: 32px;
+  /* 排版尺度：字号、行高、间距、宽度统一从这里取，别在局部再写 13px / 1.45 */
+  --fs-cap: 12px;
+  --fs-body: 15px;
+  --lh-body: 1.8;
+  --track: 0.02em;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --radius-bubble: 16px;
+  --width-read: 36rem;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -334,34 +345,43 @@ button:disabled { cursor: default; opacity: 0.45; }
 }
 .title-chip span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .title-chip .seal, .title-chip .avatar-img { --seal: 24px; width: 24px; height: 24px; }
-.transcript { flex: 1; overflow: auto; padding: 8px 16px 8px; background: #fff; }
+.transcript { flex: 1; overflow: auto; padding: var(--space-4) var(--space-5) var(--space-3); background: #fff; }
 .day {
   margin: 16px 0 8px; text-align: center;
-  color: var(--muted); font-size: 12px;
+  color: var(--muted); font-size: var(--fs-cap);
 }
 .msg {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
-  column-gap: 4px;
-  padding: 8px 0;
+  grid-template-columns: 44px minmax(0, 1fr);
+  column-gap: 8px;
+  padding: 10px 0;
 }
-.msg .seal, .msg .avatar-img, .msg .avatar-slot { --seal: 36px; width: 36px; height: 36px; }
+.msg .seal, .msg .avatar-img, .msg .avatar-slot { --seal: 44px; width: 44px; height: 44px; }
 .msg.is-cont { padding-top: 2px; }
 .msg-body { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; padding-top: 2px; }
-.msg-name { font-size: 14px; font-weight: 400; margin: 0 0 4px; }
-.bubble-wrap { position: relative; width: fit-content; max-width: min(32rem, 100%); }
+.msg-name { font-size: var(--fs-cap); font-weight: 400; color: var(--muted); margin: 0 0 4px; }
+.bubble-wrap { position: relative; width: fit-content; max-width: min(var(--width-read), 100%); }
 .msg.is-user .bubble-wrap { max-width: 100%; }
 .bubble {
   width: fit-content;
   max-width: 100%;
-  border-radius: 12px;
+  border-radius: var(--radius-bubble);
   background: var(--bubble);
-  padding: 8px 12px;
-  font-size: 15px;
-  line-height: 1.45;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  letter-spacing: var(--track);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+/* 知几这边不用气泡：像稿纸上的批注，左侧一条线，读起来不挤 */
+.msg.is-agent .bubble {
+  background: transparent;
+  border-radius: 0;
+  padding: 0 0 0 var(--space-4);
+  border-left: 2px solid var(--rule);
+}
+.msg.is-agent .bubble.is-poem { border-left: 0; padding-left: 0; }
 .msg.is-user {
   display: flex;
   justify-content: flex-end;
@@ -370,16 +390,17 @@ button:disabled { cursor: default; opacity: 0.45; }
   padding: 4px 0;
 }
 .msg.is-user .msg-body { align-items: flex-end; padding-top: 0; width: min(78%, 40rem); max-width: calc(100% - 44px); }
-.msg.is-user .bubble { background: var(--ink); color: #fdfdfc; max-width: 100%; }
+.msg.is-user .bubble { background: var(--ink); color: #fdfdfc; max-width: 100%; border-radius: 16px 16px 4px 16px; }
 .bubble.is-poem {
   font-family: var(--kai);
   letter-spacing: 0.08em;
   animation: poem-rise 1.8s ease forwards;
 }
 .msg.is-pop .bubble { transform-origin: bottom right; animation: bubble-pop 440ms var(--enter-delay, 0ms) both; }
+.msg.is-agent.is-pop .bubble { transform-origin: bottom left; animation: bubble-rise 240ms cubic-bezier(.2, .7, .3, 1) both; }
 .delivery {
   margin-top: 6px; border: 0; background: transparent; color: var(--muted);
-  font-size: 12px; padding: 0; text-align: left;
+  font-size: var(--fs-cap); padding: 0; text-align: left;
 }
 button.delivery { text-decoration: underline; text-underline-offset: 2px; }
 @keyframes poem-rise {
@@ -389,6 +410,10 @@ button.delivery { text-decoration: underline; text-underline-offset: 2px; }
 @keyframes bubble-pop {
   0% { opacity: .25; transform: translateY(11px) scale(.91); }
   62% { opacity: 1; transform: translateY(-2px) scale(1.018); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes bubble-rise {
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
 }
 .msg-actions {
