@@ -45,6 +45,13 @@ function taskBlock(task, angle, timeMode) {
   } else {
     lines.push('直接按这张盘解读当前事项。evidence 里有什么就用什么。');
   }
+  if (task === 'read' || task === 'revise') {
+    lines.push('结构。这一轮按四段写，段与段之间空一行；不加小标题、不编号、不用 Markdown。与「控制篇幅」的默认两段式冲突时，以本条为准。');
+    lines.push('第一段，判断：一句话回答用户最关心的方向，二十字以内。');
+    lines.push('第二段，依据：挑最影响结论的一到两项，每项后面紧跟 [E编号]，并点明哪一项让判断减弱。');
+    lines.push('第三段，分歧与边界：紫微与奇门不一致就说清冲突在哪；一致或信息不足，就写明这一层能说到哪里。');
+    lines.push('第四段，做法：一条具体到动作或时间的事，两行以内。');
+  }
   if (angle === 'fortune') lines.push('用户要求只按命理。写到解读结束即可，不要追问复习时长、模拟成绩或准备进度。');
   if (angle === 'evidence') lines.push('用户要求看依据。每个判断后面紧跟 [E编号]。');
   if (angle === 'plain') lines.push('用户要求说得直白。少用术语；必须出现的术语立刻用白话解释。');
@@ -75,6 +82,7 @@ function rewriteNote(reasons, previousAnswer, invented) {
   if (reasons.includes('percent')) lines.push('删掉通过率、百分比和「百分之」。改成偏有利、阻力偏多、利弊相抵或依据不足。');
   if (reasons.includes('cite')) lines.push('判断后面只能引用本次 evidence 里真实存在的 [E编号]。没有的编号不要写。');
   if (reasons.includes('invented')) lines.push('删掉这些 evidence 原文里没有的说法：' + (invented || []).join('、') + '。宫位数字不要改成别的卦，格局名没写就不要写。');
+  if (reasons.includes('flat')) lines.push('整段挤在一起了。拆成四段，段与段之间空一行：判断、依据、分歧与边界、做法。不要加小标题、不要编号、不要 Markdown。');
   return lines.join('\n');
 }
 

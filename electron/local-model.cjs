@@ -46,6 +46,9 @@ function matterOf(input) {
     sourceText: String(matter.sourceText || '').slice(0, 400)
   };
 }
+function sections(text) {
+  return String(text || '').split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
+}
 function qualityReasons(text, input) {
   const reasons = [];
   const evidence = Array.isArray(input.evidence) ? input.evidence : [];
@@ -60,6 +63,8 @@ function qualityReasons(text, input) {
     const used = [...String(text).matchAll(/\[(E\d+)\]/g)].map((match) => match[1]);
     if (!used.length || used.some((id) => !ids.has(id))) reasons.push('cite');
     if (inventedChartTerms(text, evidence).length) reasons.push('invented');
+    const chars = String(text).replace(/\s+/g, '').length;
+    if (chars >= 160 && sections(text).length < 3) reasons.push('flat');
   }
   return reasons;
 }
